@@ -42,3 +42,20 @@ resource "azurerm_cosmosdb_account" "cosmosdb" {
   public_network_access_enabled     = "true"
   resource_group_name               = var.rg
 }
+
+resource "azurerm_cosmosdb_mongo_database" "pluralsight" {
+  name                = "pluralsight"
+  resource_group_name = var.rg
+  account_name        = azurerm_cosmosdb_account.cosmosdb.name
+}
+
+resource "azurerm_cosmosdb_mongo_collection" "movies" {
+  name                = "movies"
+  resource_group_name = var.rg
+  account_name        = azurerm_cosmosdb_account.cosmosdb.name
+  database_name       = azurerm_cosmosdb_mongo_database.pluralsight.name
+
+  default_ttl_seconds = "777"
+  shard_key           = "Title"
+  throughput          = 400
+}
