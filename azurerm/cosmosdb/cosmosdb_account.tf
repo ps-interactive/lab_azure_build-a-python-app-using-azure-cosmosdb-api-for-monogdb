@@ -8,12 +8,8 @@ resource "random_string" "random_cosmosdb" {
 resource "azurerm_cosmosdb_account" "cosmosdb" {
   analytical_storage_enabled = "false"
 
-  capabilities {
-    name = "EnableTable"
-  }
-
   consistency_policy {
-    consistency_level       = "BoundedStaleness"
+    consistency_level       = "Session"
     max_interval_in_seconds = "86400"
     max_staleness_prefix    = "1000000"
   }
@@ -21,23 +17,28 @@ resource "azurerm_cosmosdb_account" "cosmosdb" {
   enable_automatic_failover       = "false"
   enable_free_tier                = "false"
   enable_multiple_write_locations = "false"
+  capabilities {
+    name = "EnableAggregationPipeline"
+  }
 
+  capabilities {
+    name = "mongoEnableDocLevelTTL"
+  }
+
+  capabilities {
+    name = "EnableMongo"
+  }
   geo_location {
     failover_priority = "0"
-    location          = "eastus"
+    location          = var.rg_loc
     zone_redundant    = "false"
   }
 
   is_virtual_network_filter_enabled = "false"
-  kind                              = "GlobalDocumentDB"
-  location                          = "eastus"
+  kind                              = "MongoDB"
+  location                          = var.rg_loc
   name                              = "cosmosdb${random_string.random_cosmosdb.result}"
   offer_type                        = "Standard"
   public_network_access_enabled     = "true"
   resource_group_name               = var.rg
-
-  tags = {
-    CosmosAccountType = "Non-Production"
-    defaultExperience = "Azure Table"
-  }
 }
